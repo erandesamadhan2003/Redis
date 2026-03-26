@@ -5,13 +5,11 @@
 #include <vector>
 #include <sys/select.h>
 
-Server::Server(int port) : port(port)
-{
+Server::Server(int port) : port(port) {
     commandHandler = CommandHandler();
 }
 
-void Server::start()
-{
+void Server::start() {
     server_socket.createSocket();
     server_socket.bindSocket(port);
     server_socket.listenSocket();
@@ -20,12 +18,10 @@ void Server::start()
     std::cout << "Logs from your program will appear here!\n";
 }
 
-void Server::run()
-{
-    std::vector<int> clients;
-
-    while (true)
-    {
+void Server::run() {
+    std::vector<int> clients; 
+    
+    while (true) {
         fd_set read_fds;
         FD_ZERO(&read_fds);
 
@@ -33,8 +29,7 @@ void Server::run()
 
         int max_fd = server_socket.getServerFd();
 
-        for (int c : clients)
-        {
+        for (int c : clients) {
             FD_SET(c, &read_fds);
             if (c > max_fd)
                 max_fd = c;
@@ -42,8 +37,7 @@ void Server::run()
 
         select(max_fd + 1, &read_fds, nullptr, nullptr, nullptr);
 
-        if (FD_ISSET(server_socket.getServerFd(), &read_fds))
-        {
+        if (FD_ISSET(server_socket.getServerFd(), &read_fds)) {
             int client_fd = server_socket.acceptClient();
             clients.push_back(client_fd);
             std::cout << "New Client connected\n";
@@ -51,23 +45,19 @@ void Server::run()
 
         int n = clients.size();
 
-        for (int i = 0; i < n; i++)
-        {
+        for (int i = 0; i < n; i++) {
             int client_fd = clients[i];
 
-            if (FD_ISSET(client_fd, &read_fds))
-            {
+            if (FD_ISSET(client_fd, &read_fds)) {
                 char buffer[1024];
 
-                if (read(client_fd, buffer, 1024) <= 0)
-                {
+                if (read(client_fd, buffer, 1024) <= 0) {
                     close(client_fd);
                     clients.erase(clients.begin() + i);
                     i--;
                     n--;
                 }
-                else
-                {
+                else {
                     std::string response = commandHandler.handleCommand(std::string(buffer));
                     send(client_fd, response.c_str(), response.size(), 0);
                 }
@@ -77,10 +67,6 @@ void Server::run()
 }
 
 Server::~Server() {}
-
-
-
-
 
 /* ============================================================================
   FUNCTION SYNTAX AND CODE EXPLANATION
@@ -99,16 +85,16 @@ Server::~Server() {}
      - FD_ISSET(fd, fd_set*): Checks if fd is ready after select()
  
   3. select() FUNCTION
-     Syntax: select(int nfds, fd_set* readfds, fd_set* writefds,
+     Syntax: select(int nfds, fd_set* readfds, fd_set* writefds, 
                     fd_set* errorfds, struct timeval* timeout)
- 
+     
      Parameters:
      - nfds: Highest file descriptor value + 1
      - readfds: Set of sockets to monitor for incoming data
      - writefds: Set of sockets to monitor for write readiness
      - errorfds: Set of sockets to monitor for exceptions
      - timeout: How long to wait (nullptr = wait indefinitely)
- 
+     
      Returns: Number of ready file descriptors
      - Blocks until at least one monitored socket has activity
  

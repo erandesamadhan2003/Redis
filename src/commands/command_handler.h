@@ -16,9 +16,9 @@ private:
         ECHO
     };
 
-    CommandType commandType(const std::string& command) {}
+    CommandType commandType(const std::string& command);
 
 public:
     CommandHandler();
-    std::string handleCommand(const std::string& input) {}
+    std::string handleCommand(const std::string& input);
 };
