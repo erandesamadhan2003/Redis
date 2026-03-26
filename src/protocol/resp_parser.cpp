@@ -103,7 +103,7 @@ vector<string> RESPParser::parse(const string& input) {
 }
 
 string RESPParser::serialize(const vector<string>& data) {
-    string result = "*" + to_string(data.size()) + "\r\n";
+    string result = "";
     for (const auto& item : data) {
         result += "$" + to_string(item.size()) + "\r\n" + item + "\r\n";
     }
