@@ -104,8 +104,10 @@ vector<string> RESPParser::parse(const string& input) {
 
 string RESPParser::serialize(const vector<string>& data) {
     string result = "";
-    for (const auto& item : data) {
-        result += "$" + to_string(item.size()) + "\r\n" + item + "\r\n";
+    for (int i = 0; i < data.size(); i++) {
+        result += data[i];
+        if (i < data.size() - 1) 
+            result += " ";
     }
-    return result;
+    return "$"+to_string(result.size())+"\r\n"+result+"\r\n";
 }
