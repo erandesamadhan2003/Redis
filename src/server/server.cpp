@@ -6,7 +6,8 @@
 #include <sys/select.h>
 
 Server::Server(int port) : port(port) {
-    commandHandler = CommandHandler();
+    store = DataStore();
+    commandHandler = CommandHandler(&store);
 }
 
 void Server::start() {
