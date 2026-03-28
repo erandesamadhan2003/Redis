@@ -7,6 +7,7 @@
 #include "./echo_command.h"
 #include "./set_command.h"
 #include "./get_command.h"
+#include "./rpush_command.h"
 #include "./../datastore/datastore.h"
 
 class CommandHandler {
@@ -16,8 +17,9 @@ private:
     EchoCommand echoCommand;
     SetCommand setCommand;
     GetCommand getCommand;
+    RPushCommand rpushCommand;
 
-    enum class CommandType { PING, ECHO, GET, SET };
+    enum class CommandType { PING, ECHO, GET, SET, RPUSH, LRANGE };
     CommandType commandType(const std::string& command);
 
 public:

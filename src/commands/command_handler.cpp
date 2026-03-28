@@ -10,6 +10,7 @@ CommandHandler::CommandType CommandHandler::commandType(const std::string& comma
     else if (cmd == "echo")  return CommandType::ECHO;
     else if (cmd == "set")   return CommandType::SET;
     else if (cmd == "get")   return CommandType::GET;
+    else if (cmd == "rpush") return CommandType::RPUSH;
     else throw std::invalid_argument("Unknown command: " + command);
 }
 
@@ -40,11 +41,24 @@ std::string CommandHandler::handleCommand(const std::string& input) {
                 return "-Error: " + std::string(e.what()) + "\r\n";
             }
 
-        case CommandType::GET: {
-            if (tokens.size() < 2) return "-Error: GET requires a key\r\n";
-            if (!store->exist(tokens[1])) return "$-1\r\n";
-            return respParser.serialize({store->get(tokens[1])});
-        }
+        case CommandType::GET: 
+            try {
+                auto result = getCommand.execute(tokens, *store);
+                if (result.empty()) return "$-1\r\n";
+                if (result[0] == "$-1\r\n") return "$-1\r\n";
+                std::string val = result[0];
+                return "$" + std::to_string(val.size()) + "\r\n" + val + "\r\n";
+            } catch (const std::exception& e) {
+                return "-" + std::string(e.what()) + "\r\n";
+            }
+        
+        case CommandType::RPUSH:
+            try {
+                int len = rpushCommand.execute(tokens, *store);
+                return ":" + std::to_string(len) + "\r\n";
+            } catch (const std::exception& e) {
+                return "-" + std::string(e.what()) + "\r\n";
+            }
 
         default:
             return "-Error: Unknown command\r\n";
