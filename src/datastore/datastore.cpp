@@ -2,7 +2,7 @@
 
 DataStore::DataStore() {}
 
-void DataStore::set(const std::string& key, const std::string& val, std::optional<std::chrono::steady_clock::time_point> expire_time = std::nullopt) {
+void DataStore::set(const std::string &key, const std::string &val, std::optional<std::chrono::steady_clock::time_point> expire_time) {
     store[key] = Entry{val, expire_time};
 }
 
