@@ -56,7 +56,10 @@ vector<string> RESPParser::parse(const string& input) {
 }
 
 string RESPParser::serialize(const vector<string>& data) {
-    if (data.empty()) return "$-1\r\n";
-    const string& result = data[0];
-    return "$" + to_string(result.size()) + "\r\n" + result + "\r\n";
+    if (data.size() == 0) return "$-1\r\n";
+    string result = "*" + to_string(data.size()) + "\r\n";
+    for (size_t i = 0; i < data.size(); ++i) {
+        result += "$" + to_string(data[i].size()) + "\r\n" + data[i] + "\r\n";
+    }
+    return result;
 }

@@ -1,5 +1,4 @@
 #include "./datastore.h"
-
 DataStore::DataStore() {}
 
 bool DataStore::isExpire(const std::string& key) {
@@ -73,7 +72,6 @@ std::deque<std::string> DataStore::lrange(const std::string& key, int start, int
 
     if (start < 0) start = std::max(0, size + start);
     if (stop < 0)  stop  = size + stop;
-
     stop = std::min(stop, size - 1);
 
     if (start > stop) return {};

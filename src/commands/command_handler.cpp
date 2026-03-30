@@ -11,6 +11,7 @@ CommandHandler::CommandType CommandHandler::commandType(const std::string& comma
     else if (cmd == "set")   return CommandType::SET;
     else if (cmd == "get")   return CommandType::GET;
     else if (cmd == "rpush") return CommandType::RPUSH;
+    else if (cmd == "lrange") return CommandType::LRANGE;
     else throw std::invalid_argument("Unknown command: " + command);
 }
 
@@ -30,9 +31,10 @@ std::string CommandHandler::handleCommand(const std::string& input) {
         case CommandType::PING:
             return "+PONG\r\n";
 
-        case CommandType::ECHO:
+        case CommandType::ECHO: 
+            if (tokens.size() != 2) return "-ERR wrong number of arguments for 'echo' command\r\n";
             return respParser.serialize(echoCommand.execute(tokens));
-
+        
         case CommandType::SET:
             try {
                 setCommand.execute(tokens, *store);
@@ -41,7 +43,7 @@ std::string CommandHandler::handleCommand(const std::string& input) {
                 return "-Error: " + std::string(e.what()) + "\r\n";
             }
 
-        case CommandType::GET: 
+        case CommandType::GET: {
             try {
                 auto result = getCommand.execute(tokens, *store);
                 if (result.empty()) return "$-1\r\n";
@@ -51,15 +53,25 @@ std::string CommandHandler::handleCommand(const std::string& input) {
             } catch (const std::exception& e) {
                 return "-" + std::string(e.what()) + "\r\n";
             }
+        }
         
-        case CommandType::RPUSH:
+        case CommandType::RPUSH: {
             try {
                 int len = rpushCommand.execute(tokens, *store);
                 return ":" + std::to_string(len) + "\r\n";
             } catch (const std::exception& e) {
                 return "-" + std::string(e.what()) + "\r\n";
             }
-
+        }
+        
+        case CommandType::LRANGE: {
+            try {
+                std::vector<std::string> result = lrangeCommand.execute(tokens, *store);
+                return respParser.serialize(result);
+            } catch (const std::exception& e) {
+                return "-ERR " + std::string(e.what()) + "\r\n";
+            }
+        }
         default:
             return "-Error: Unknown command\r\n";
     }
