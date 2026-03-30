@@ -11,6 +11,7 @@ CommandHandler::CommandType CommandHandler::commandType(const std::string& comma
     else if (cmd == "set")   return CommandType::SET;
     else if (cmd == "get")   return CommandType::GET;
     else if (cmd == "rpush") return CommandType::RPUSH;
+    else if (cmd == "lpush") return CommandType::LPUSH; 
     else if (cmd == "lrange") return CommandType::LRANGE;
     else throw std::invalid_argument("Unknown command: " + command);
 }
@@ -59,6 +60,15 @@ std::string CommandHandler::handleCommand(const std::string& input) {
         case CommandType::RPUSH: {
             try {
                 int len = rpushCommand.execute(tokens, *store);
+                return ":" + std::to_string(len) + "\r\n";
+            } catch (const std::exception& e) {
+                return "-" + std::string(e.what()) + "\r\n";
+            }
+        }
+
+        case CommandType::LPUSH: {
+            try {
+                int len = lpushCommand.execute(tokens, *store);
                 return ":" + std::to_string(len) + "\r\n";
             } catch (const std::exception& e) {
                 return "-" + std::string(e.what()) + "\r\n";

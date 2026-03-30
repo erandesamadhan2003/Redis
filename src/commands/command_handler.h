@@ -18,8 +18,9 @@ private:
     SetCommand setCommand;
     GetCommand getCommand;
     RPushCommand rpushCommand;
+    LPUSHCommand lpushCommand;
     LRANGECommand lrangeCommand;
-    enum class CommandType { PING, ECHO, GET, SET, RPUSH, LRANGE };
+    enum class CommandType { PING, ECHO, GET, SET, RPUSH, LPUSH, LRANGE };
     CommandType commandType(const std::string& command);
 
 public:
