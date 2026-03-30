@@ -33,7 +33,8 @@ std::string CommandHandler::handleCommand(const std::string& input) {
 
         case CommandType::ECHO: 
             if (tokens.size() != 2) return "-ERR wrong number of arguments for 'echo' command\r\n";
-            return respParser.serialize(echoCommand.execute(tokens));
+            return "+" + tokens[1] + "\r\n";
+            // return respParser.serialize(echoCommand.execute(tokens));
         
         case CommandType::SET:
             try {
