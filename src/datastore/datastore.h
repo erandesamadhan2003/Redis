@@ -36,5 +36,6 @@ public:
     bool exist(const std::string& key);
     RedisType getType(const std::string& key);
     int rpush(const std::string& key, const std::vector<std::string>& values);
+    int lpush(const std::string& key, const std::vector<std::string>& values);
     std::deque<std::string> lrange(const std::string& key, int start, int stop);
 };

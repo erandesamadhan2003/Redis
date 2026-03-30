@@ -7,3 +7,8 @@ class RPushCommand {
 public:
     int execute(const std::vector<std::string>& args, DataStore& store);
 };
+
+class LPUSHCommand {
+public:
+    int execute(const std::vector<std::string>& args, DataStore& store);
+};

@@ -7,7 +7,7 @@
 #include "./echo_command.h"
 #include "./set_command.h"
 #include "./get_command.h"
-#include "./rpush_command.h"
+#include "./push_command.h"
 #include "./../datastore/datastore.h"
 #include "./lrange_command.h"
 class CommandHandler {

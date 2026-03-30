@@ -1,4 +1,4 @@
-#include "./rpush_command.h"
+#include "./push_command.h"
 
 int RPushCommand::execute(const std::vector<std::string>& args, DataStore& store) {
     if (args.size() < 3) throw std::invalid_argument("wrong number of arguments for 'rpush' command");

@@ -60,6 +60,22 @@ int DataStore::rpush(const std::string& key, const std::vector<std::string>& val
     return store[key].data.list_value.size();
 }
 
+int DataStore::lpush(const std::string& key, const std::vector<std::string>& values) {
+    auto it = store.find(key);
+    if (it != store.end() && it->second.data.type != RedisType::LIST) {
+        throw std::runtime_error("WRONGTYPE Operation against a key holding the wrong kind of value");
+    }
+    if (it == store.end()) {
+        RedisObject obj;
+        obj.type = RedisType::LIST;
+        store[key] = Entry{obj, std::nullopt};
+    }
+    for (const auto& val : values) {
+        store[key].data.list_value.push_front(val);
+    }
+    return store[key].data.list_value.size();
+}
+
 std::deque<std::string> DataStore::lrange(const std::string& key, int start, int stop) {
     auto it = store.find(key);
     if (it == store.end()) return {};
