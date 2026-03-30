@@ -67,7 +67,7 @@ std::string CommandHandler::handleCommand(const std::string& input) {
         case CommandType::LRANGE: {
             try {
                 std::vector<std::string> result = lrangeCommand.execute(tokens, *store);
-                if (result.empty()) return {};
+                if (result.empty()) return "*0\r\n";
                 return respParser.serialize(result);
             } catch (const std::exception& e) {
                 return "-ERR " + std::string(e.what()) + "\r\n";
