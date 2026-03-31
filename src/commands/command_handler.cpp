@@ -14,6 +14,7 @@ CommandHandler::CommandType CommandHandler::commandType(const std::string& comma
     else if (cmd == "lpush") return CommandType::LPUSH; 
     else if (cmd == "lrange") return CommandType::LRANGE;
     else if (cmd == "llen") return CommandType::LLEN;
+    else if (cmd == "lpop") return CommandType::LPOP;
     else throw std::invalid_argument("Unknown command: " + command);
 }
 
@@ -89,6 +90,16 @@ std::string CommandHandler::handleCommand(const std::string& input) {
             try {
                 int len = store->llen(tokens[1]);
                 return ":" + std::to_string(len) + "\r\n";
+            } catch (const std::exception& e) {
+                return "-ERR " + std::string(e.what()) + "\r\n";
+            }
+        }
+
+        case CommandType::LPOP: {
+            try {
+                std::vector<std::string> result = lpopCommand.execute(tokens, *store);
+                return respParser.serialize(result);
+                
             } catch (const std::exception& e) {
                 return "-ERR " + std::string(e.what()) + "\r\n";
             }

@@ -103,3 +103,10 @@ int DataStore::llen(const std::string& key) {
     }
     return it->second.data.list_value.size();
 }
+
+std::string DataStore::lpop(const std::string& key) {
+    auto it = store.find(key);
+    std::string result = it->second.data.list_value.front();
+    it->second.data.list_value.pop_front();
+    return result;
+}

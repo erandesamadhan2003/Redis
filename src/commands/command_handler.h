@@ -9,7 +9,7 @@
 #include "./push_command.h"
 #include "./../datastore/datastore.h"
 #include "./lrange_command.h"
-
+#include "./lpop_command.h"
 class CommandHandler {
 private:
     DataStore* store;
@@ -19,7 +19,8 @@ private:
     RPushCommand rpushCommand;
     LPUSHCommand lpushCommand;
     LRANGECommand lrangeCommand;
-    enum class CommandType { PING, ECHO, GET, SET, RPUSH, LPUSH, LRANGE, LLEN };
+    LPOPCommand lpopCommand;
+    enum class CommandType { PING, ECHO, GET, SET, RPUSH, LPUSH, LRANGE, LLEN, LPOP };
     CommandType commandType(const std::string& command);
 
 public:
