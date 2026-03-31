@@ -94,3 +94,12 @@ std::deque<std::string> DataStore::lrange(const std::string& key, int start, int
 
     return std::deque<std::string>(list.begin() + start, list.begin() + stop + 1);
 }
+
+int DataStore::llen(const std::string& key) {
+    auto it = store.find(key);
+    if (it == store.end()) return 0;
+    if (it->second.data.type != RedisType::LIST) {
+        throw std::runtime_error("WRONGTYPE Operation against a key holding the wrong kind of value");
+    }
+    return it->second.data.list_value.size();
+}

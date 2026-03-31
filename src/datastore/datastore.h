@@ -38,4 +38,5 @@ public:
     int rpush(const std::string& key, const std::vector<std::string>& values);
     int lpush(const std::string& key, const std::vector<std::string>& values);
     std::deque<std::string> lrange(const std::string& key, int start, int stop);
+    int llen(const std::string& key);
 };

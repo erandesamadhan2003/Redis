@@ -13,6 +13,7 @@ CommandHandler::CommandType CommandHandler::commandType(const std::string& comma
     else if (cmd == "rpush") return CommandType::RPUSH;
     else if (cmd == "lpush") return CommandType::LPUSH; 
     else if (cmd == "lrange") return CommandType::LRANGE;
+    else if (cmd == "llen") return CommandType::LLEN;
     else throw std::invalid_argument("Unknown command: " + command);
 }
 
@@ -35,7 +36,6 @@ std::string CommandHandler::handleCommand(const std::string& input) {
         case CommandType::ECHO: 
             if (tokens.size() != 2) return "-ERR wrong number of arguments for 'echo' command\r\n";
             return "$" + std::to_string(tokens[1].size()) + "\r\n" + tokens[1] + "\r\n";
-            // return respParser.serialize(echoCommand.execute(tokens));
         
         case CommandType::SET:
             try {
@@ -84,6 +84,16 @@ std::string CommandHandler::handleCommand(const std::string& input) {
                 return "-ERR " + std::string(e.what()) + "\r\n";
             }
         }
+
+        case CommandType::LLEN: {
+            try {
+                int len = store->llen(tokens[1]);
+                return ":" + std::to_string(len) + "\r\n";
+            } catch (const std::exception& e) {
+                return "-ERR " + std::string(e.what()) + "\r\n";
+            }
+        }
+        
         default:
             return "-Error: Unknown command\r\n";
     }
