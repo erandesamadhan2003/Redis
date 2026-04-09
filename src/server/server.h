@@ -6,8 +6,8 @@
 class Server {
     Socket server_socket;
     int port;
-    CommandHandler commandHandler;
     DataStore store;
+    CommandHandler commandHandler;
 public:
     Server(int port);
     void start();

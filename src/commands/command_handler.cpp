@@ -1,6 +1,7 @@
 #include "./command_handler.h"
+#include "./blpop_command.h"
 
-CommandHandler::CommandHandler(DataStore* store) : store(store) {}
+CommandHandler::CommandHandler(DataStore& store) : store(store) {}
 
 CommandHandler::CommandType CommandHandler::commandType(const std::string& command) {
     std::string cmd = command;
@@ -15,10 +16,11 @@ CommandHandler::CommandType CommandHandler::commandType(const std::string& comma
     else if (cmd == "lrange") return CommandType::LRANGE;
     else if (cmd == "llen") return CommandType::LLEN;
     else if (cmd == "lpop") return CommandType::LPOP;
+    else if (cmd == "blpop") return CommandType::BLPOP;
     else throw std::invalid_argument("Unknown command: " + command);
 }
 
-std::string CommandHandler::handleCommand(const std::string& input) {
+std::string CommandHandler::handleCommand(const std::string& input, int client_fd) {
     std::vector<std::string> tokens = respParser.parse(input);
 
     if (tokens.empty()) return "-Error: Empty command\r\n";
@@ -40,7 +42,7 @@ std::string CommandHandler::handleCommand(const std::string& input) {
         
         case CommandType::SET:
             try {
-                setCommand.execute(tokens, *store);
+                setCommand.execute(tokens, store);
                 return "+OK\r\n";
             } catch (const std::invalid_argument& e) {
                 return "-Error: " + std::string(e.what()) + "\r\n";
@@ -48,7 +50,7 @@ std::string CommandHandler::handleCommand(const std::string& input) {
 
         case CommandType::GET: {
             try {
-                auto result = getCommand.execute(tokens, *store);
+                auto result = getCommand.execute(tokens, store);
                 if (result.empty()) return "$-1\r\n";
                 if (result[0] == "$-1\r\n") return "$-1\r\n";
                 std::string val = result[0];
@@ -60,7 +62,7 @@ std::string CommandHandler::handleCommand(const std::string& input) {
         
         case CommandType::RPUSH: {
             try {
-                int len = rpushCommand.execute(tokens, *store);
+                int len = rpushCommand.execute(tokens, store);
                 return ":" + std::to_string(len) + "\r\n";
             } catch (const std::exception& e) {
                 return "-" + std::string(e.what()) + "\r\n";
@@ -69,7 +71,7 @@ std::string CommandHandler::handleCommand(const std::string& input) {
 
         case CommandType::LPUSH: {
             try {
-                int len = lpushCommand.execute(tokens, *store);
+                int len = lpushCommand.execute(tokens, store);
                 return ":" + std::to_string(len) + "\r\n";
             } catch (const std::exception& e) {
                 return "-" + std::string(e.what()) + "\r\n";
@@ -78,7 +80,7 @@ std::string CommandHandler::handleCommand(const std::string& input) {
         
         case CommandType::LRANGE: {
             try {
-                std::vector<std::string> result = lrangeCommand.execute(tokens, *store);
+                std::vector<std::string> result = lrangeCommand.execute(tokens, store);
                 if (result.empty()) return "*0\r\n";
                 return respParser.serialize(result);
             } catch (const std::exception& e) {
@@ -88,7 +90,7 @@ std::string CommandHandler::handleCommand(const std::string& input) {
 
         case CommandType::LLEN: {
             try {
-                int len = store->llen(tokens[1]);
+                int len = store.llen(tokens[1]);
                 return ":" + std::to_string(len) + "\r\n";
             } catch (const std::exception& e) {
                 return "-ERR " + std::string(e.what()) + "\r\n";
@@ -97,7 +99,7 @@ std::string CommandHandler::handleCommand(const std::string& input) {
 
         case CommandType::LPOP: {
             try {
-                std::vector<std::string> result = lpopCommand.execute(tokens, *store);
+                std::vector<std::string> result = lpopCommand.execute(tokens, store);
                 return respParser.serialize(result);
                 
             } catch (const std::exception& e) {
@@ -105,6 +107,16 @@ std::string CommandHandler::handleCommand(const std::string& input) {
             }
         }
         
+        case CommandType::BLPOP: {
+            try {
+                BlPOPCommand blpopCommand;
+                std::vector<std::string> result = blpopCommand.execute(tokens, store, client_fd);
+                if (result.empty()) return "";
+                return respParser.serialize(result);
+            } catch (const std::exception& e) {
+                return "-ERR " + std::string(e.what()) + "\r\n";
+            }
+        }
         default:
             return "-Error: Unknown command\r\n";
     }

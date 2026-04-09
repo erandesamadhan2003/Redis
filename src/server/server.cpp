@@ -5,10 +5,7 @@
 #include <vector>
 #include <sys/select.h>
 
-Server::Server(int port) : port(port) {
-    store = DataStore();
-    commandHandler = CommandHandler(&store);
-}
+Server::Server(int port) : port(port), store(), commandHandler(store) {}
 
 void Server::start() {
     server_socket.createSocket();
@@ -28,6 +25,7 @@ void Server::run() {
 
         FD_SET(server_socket.getServerFd(), &read_fds);
 
+        store.handleBlockedTimeouts();
         int max_fd = server_socket.getServerFd();
 
         for (int c : clients) {
@@ -36,7 +34,10 @@ void Server::run() {
                 max_fd = c;
         }
 
-        select(max_fd + 1, &read_fds, nullptr, nullptr, nullptr);
+        struct timeval timeout;
+        timeout.tv_sec = 1; 
+        timeout.tv_usec = 0;
+        select(max_fd + 1, &read_fds, nullptr, nullptr, &timeout);
 
         if (FD_ISSET(server_socket.getServerFd(), &read_fds)) {
             int client_fd = server_socket.acceptClient();
@@ -53,14 +54,17 @@ void Server::run() {
                 char buffer[1024];
 
                 if (read(client_fd, buffer, 1024) <= 0) {
+                    store.removeClient(client_fd);
                     close(client_fd);
                     clients.erase(clients.begin() + i);
                     i--;
                     n--;
                 }
                 else {
-                    std::string response = commandHandler.handleCommand(std::string(buffer));
-                    send(client_fd, response.c_str(), response.size(), 0);
+                    std::string response = commandHandler.handleCommand(std::string(buffer), client_fd);
+                    if (!response.empty()) {
+                        send(client_fd, response.c_str(), response.size(), 0);
+                    }
                 }
             }
         }
