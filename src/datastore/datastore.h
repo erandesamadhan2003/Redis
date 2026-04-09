@@ -1,4 +1,4 @@
-#pragma once
+#pragma once 
 #include <unordered_map>
 #include <string>
 #include <optional>
@@ -7,64 +7,60 @@
 #include <vector>
 #include <stdexcept>
 #include <list>
-enum class RedisType
-{
+enum class RedisType {
     STRING,
     LIST,
     SET,
     HASH
 };
 
-struct RedisObject
-{
+struct RedisObject {
     RedisType type;
     std::string string_value;
     std::deque<std::string> list_value;
 };
 
-struct Entry
-{
+struct Entry {
     RedisObject data;
     std::optional<std::chrono::steady_clock::time_point> expire_time;
 };
 
-struct BlockedClient
-{
+struct BlockedClient{
     int fd;
     std::vector<std::string> keys;
     std::chrono::steady_clock::time_point expire_time;
-    std::unordered_map<std::string, std::list<BlockedClient *>::iterator> positions;
+    std::unordered_map<std::string, std::list<BlockedClient*>::iterator> positions;
 };
 
-class DataStore
-{
-private:
+
+class DataStore {
+private: 
     std::unordered_map<std::string, Entry> store;
-    bool isExpire(const std::string &key);
-    std::unordered_map<std::string, std::list<BlockedClient *>> blocked_on_keys;
-    std::vector<BlockedClient *> blockedClients;
-    void removeClientFromKeys(BlockedClient *client);
+    bool isExpire(const std::string& key);
+    std::unordered_map<std::string, std::list<BlockedClient*>> blocked_on_keys;
+    std::vector<BlockedClient*> blockedClients;
+    void removeClientFromKeys(BlockedClient* client);
 
-public:
+public: 
     DataStore();
+    
+    bool exist(const std::string& key);
+    RedisType getType(const std::string& key);
+    
+    void set(const std::string& key, const std::string& val, std::optional<std::chrono::steady_clock::time_point> expire_time = std::nullopt);
+    std::string get(const std::string& key);
+    
+    int rpush(const std::string& key, const std::vector<std::string>& values);
+    int lpush(const std::string& key, const std::vector<std::string>& values);
+    
+    std::deque<std::string> lrange(const std::string& key, int start, int stop);
+    int llen(const std::string& key);
+    
+    std::string lpop(const std::string& key);
 
-    bool exist(const std::string &key);
-    RedisType getType(const std::string &key);
-
-    void set(const std::string &key, const std::string &val, std::optional<std::chrono::steady_clock::time_point> expire_time = std::nullopt);
-    std::string get(const std::string &key);
-
-    int rpush(const std::string &key, const std::vector<std::string> &values);
-    int lpush(const std::string &key, const std::vector<std::string> &values);
-
-    std::deque<std::string> lrange(const std::string &key, int start, int stop);
-    int llen(const std::string &key);
-
-    std::string lpop(const std::string &key);
-
-    void addBlockedClient(const std::string &key, BlockedClient *blockedClient);
-    bool isBlockedClientPresent(const std::string &key);
-    void unblockClients(const std::string &key);
+    void addBlockedClient(const std::string& key, BlockedClient* blockedClient);
+    bool isBlockedClientPresent(const std::string& key);
+    void unblockClients(const std::string& key);
 
     void handleBlockedTimeouts();
 
