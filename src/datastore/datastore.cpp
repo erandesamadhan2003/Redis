@@ -188,7 +188,7 @@ void DataStore::handleBlockedTimeouts() {
     for (auto it = blockedClients.begin(); it != blockedClients.end();) {
         BlockedClient *client = *it;
         if (client->expire_time <= now) {
-            std::string response = "$-1\r\n";
+            std::string response = "*-1\r\n";
             send(client->fd, response.c_str(), response.size(), 0);
 
             removeClientFromKeys(client);
